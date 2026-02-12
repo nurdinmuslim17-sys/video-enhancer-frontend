@@ -1,34 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>AI Video Enhancer</title>
+<title>AI Video Enhancer SaaS</title>
+<style>
+body{background:#0f172a;color:white;font-family:Arial;text-align:center}
+.container{max-width:500px;margin:40px auto;padding:20px;background:#1e293b;border-radius:15px}
+input,button{width:90%;padding:10px;margin:5px;border-radius:8px;border:none}
+button{cursor:pointer;font-weight:bold;background:#22c55e;color:black}
+</style>
 </head>
 <body>
-
-<h1>AI Video Enhancer 🚀</h1>
-
-<input type="file" id="video"/>
-<button onclick="upload()">Process</button>
-
+<div class="container">
+<h1>AI Video Enhancer SaaS</h1>
+<input id="email" placeholder="Email"><br>
+<input id="pass" type="password" placeholder="Password"><br>
+<button onclick="register()">Register</button>
+<button onclick="login()">Login</button>
+<hr>
+<input type="file" id="video"><br>
+<button onclick="upload()">Process Video</button>
+<button onclick="upgrade()">Upgrade PRO</button>
+<p id="status"></p>
+</div>
 <script>
+const API="https://YOUR_RENDER_URL";
+async function register(){
+await fetch(API+"/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email.value,password:pass.value})});
+alert("Registered ✅");}
+async function login(){
+const res=await fetch(API+"/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:email.value,password:pass.value})});
+const data=await res.json();
+localStorage.setItem("token",data.token);
+status.innerText="Login success ✅";}
 async function upload(){
-  const file = document.getElementById("video").files[0];
-  const formData = new FormData();
-  formData.append("video",file);
-
-  const res = await fetch("https://video-enhancer-saas.onrender.com/process",{
-    method:"POST",
-    headers:{
-      Authorization:localStorage.getItem("token")
-    },
-    body:formData
-  });
-
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
-  window.open(url);
-}
+const file=document.getElementById("video").files[0];
+const formData=new FormData();
+formData.append("video",file);
+const res=await fetch(API+"/process",{method:"POST",headers:{Authorization:localStorage.getItem("token")},body:formData});
+if(res.status===403){alert("Limit 1/hari (Free)");return;}
+const blob=await res.blob();
+window.open(URL.createObjectURL(blob));}
+async function upgrade(){
+const res=await fetch(API+"/create-payment",{method:"POST",headers:{Authorization:localStorage.getItem("token")}});
+const data=await res.json();
+alert("Payment token: "+data.token);}
 </script>
-
 </body>
 </html>
